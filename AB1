@@ -1,0 +1,285 @@
+from OpenGL.GL import *
+from OpenGL.GLU import *
+from OpenGL.GLUT import *
+
+from collections import namedtuple 
+
+WINDOW_WIDTH = 850
+WINDOW_HEIGHT = 850
+
+UNIT_PIXEL = 1
+
+class Vector():
+    def __init__(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+
+eye = Vector(0, 20, 30)
+center = Vector(0, 0, 0)
+up = Vector(0, 1, 0)
+
+colors ={
+    "green": [1/255, 188/255, 1/255],
+    "brown": [118/255, 74/255, 43/255],
+    "white": [255, 255, 255]
+}
+
+def init():
+    glClearColor(0.0, 0.0, 0.0, 1.0) 
+    
+    update_camera()
+    
+    glMatrixMode(GL_PROJECTION)
+    gluPerspective(45, WINDOW_WIDTH/WINDOW_HEIGHT, 0.1, 100.)
+    glMatrixMode(GL_MODELVIEW)
+
+def update_camera():
+    glMatrixMode(GL_MODELVIEW)
+    glLoadIdentity()
+    gluLookAt(eye.x   , eye.y   , eye.z,
+              center.x, center.y, center.z,
+              up.x    , up.y    , up.z)
+
+    print(f"_________________")
+    print(f"eye: ({eye.x}, {eye.y}, {eye.z})")
+    print(f"center: ({center.x}, {center.y}, {center.z})")
+    print(f"up: ({up.x}, {up.y}, {up.z})")
+
+def draw_barra_vertical(x, y, z):
+    glPushMatrix()
+    glTranslatef(0, 0, 0)
+    glColor3fv(colors["white"])
+    glScalef(0.5,3,0.5)
+    glTranslatef(x, y, z)
+    glutSolidCube(UNIT_PIXEL)
+    glPopMatrix()  
+
+def draw_barra_horizontal(x, y, z):
+    glPushMatrix()
+    glTranslatef(0, 0, 0)
+    glColor3fv(colors["white"])
+    glScalef(0.5,0.5,5.5)
+    glTranslatef(x, y, z)
+    glutSolidCube(UNIT_PIXEL)
+    glPopMatrix()  
+
+def draw_bola():
+    glPushMatrix()
+    glColor3fv(colors["white"])
+    glTranslatef(3, -3.4, 1) # movimenta a bola
+    glutSolidSphere(0.5, 100, 100)
+    glPopMatrix()
+
+def draw_campo():
+    glColor3fv(colors["green"])
+    glPushMatrix()
+    glTranslatef(0, -4, 0)
+    glScalef(20, 0.01, -12)
+    glutSolidCube(UNIT_PIXEL)
+    glPopMatrix()
+
+def bresenham(x1,z1,x2,z2):
+    dx = x2-x1
+    dz = z2-z1
+    d = 2*dz - dx
+    E = 2*dz
+    NE = 2*(dz-dx)
+    x = x1
+    z = z1
+    glBegin(GL_POINTS)
+    glColor3f(255,255,255)
+    glVertex3f(x,0,z)
+    glEnd()
+    while x<x2:
+        print(z)
+        if d <= 0:
+            d = d + E
+            x = x + 1
+        else:
+            d = d + NE
+            x = x + 0.001
+            z = z + 0.001
+        glBegin(GL_POINTS)
+        glColor3f(255,255,255)
+        glVertex3f(x,0,z)
+        glEnd()
+
+
+def display():
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+    glEnable(GL_DEPTH_TEST)
+
+    glMatrixMode(GL_MODELVIEW)
+    
+    # CAMPO
+    draw_campo()
+    # BOLA
+    draw_bola()
+    
+    # TRAVE
+    draw_barra_vertical(19,-0.8,5)
+    draw_barra_vertical(19,-0.8,-5)
+    draw_barra_vertical(-19,-0.8,5)  
+    draw_barra_vertical(-19,-0.8,-5)
+    draw_barra_horizontal(19,-1.3,0)
+    draw_barra_horizontal(-19,-1.3,0)
+
+    # LINHAS
+    # bresenham(0,0,1,100)
+    
+    # LINHA CENTRAL
+    glBegin(GL_LINES)
+    glVertex3f(0,-3.99,-6)
+    glVertex3f(0,-3.99,6)
+    glEnd()
+
+    # RETÂNGULO MENOR 1
+    glBegin(GL_LINES)
+    glVertex3f(7.5,-3.99,-3)
+    glVertex3f(7.5,-3.99,3)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex3f(7.5,-3.99,-3)
+    glVertex3f(10,-3.99,-3)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex3f(7.5,-3.99,3)
+    glVertex3f(10,-3.99,3)
+    glEnd()
+
+    # RETÂNGULO MAIOR 1
+    glBegin(GL_LINES)
+    glVertex3f(6,-3.99,-4)
+    glVertex3f(6,-3.99,4)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex3f(6,-3.99,-4)
+    glVertex3f(10,-3.99,-4)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex3f(6,-3.99,4)
+    glVertex3f(10,-3.99,4)
+    glEnd()
+
+    # RETÂNGULO MENOR 2
+    glBegin(GL_LINES)
+    glVertex3f(-7.5,-3.99,-3)
+    glVertex3f(-7.5,-3.99,3)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex3f(-7.5,-3.99,-3)
+    glVertex3f(-10,-3.99,-3)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex3f(-7.5,-3.99,3)
+    glVertex3f(-10,-3.99,3)
+    glEnd()
+
+    # RETÂNGULO MAIOR 2
+    glBegin(GL_LINES)
+    glVertex3f(-6,-3.99,-4)
+    glVertex3f(-6,-3.99,4)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex3f(-6,-3.99,-4)
+    glVertex3f(-10,-3.99,-4)
+    glEnd()
+    glBegin(GL_LINES)
+    glVertex3f(-6,-3.99,4)
+    glVertex3f(-10,-3.99,4)
+    glEnd()
+
+    glutSwapBuffers()
+
+def reshape(width, height):
+    pass
+
+def keyboard_handler(key, x, y):
+    global eye
+    global center
+    global up
+
+    # Movimentando a posição do observador (eye)
+    if key == b"w":
+        eye.z -= UNIT_PIXEL # Move uma unidade para frente
+
+    elif key == b"s":
+        eye.z += UNIT_PIXEL # Move uma unidade para trás
+
+    elif key == b"d":
+        eye.x += UNIT_PIXEL # Move uma unidade para direita
+
+    elif key == b"a":
+        eye.x -= UNIT_PIXEL # Move uma unidade para esquerda
+    
+    elif key == b"q":
+        eye.y += UNIT_PIXEL # Move uma unidade para cima
+
+    elif key == b"e":
+        eye.y -= UNIT_PIXEL # Move uma unidade para baixo   
+
+    # Movimentando a posição do ponto observado (center)
+    elif key == b"i": # Código da seta para cima
+        center.z -= UNIT_PIXEL # Move uma unidade para frente
+
+    elif key == b"k": # Código da seta para baixo
+        center.z += UNIT_PIXEL # Move uma unidade para trás
+
+    elif key == b"l": # Código da seta pra direita
+        center.x += UNIT_PIXEL # Move uma unidade para direita
+
+    elif key == b"j": # Código da seta pra esquerda
+        center.x -= UNIT_PIXEL # Move uma unidade para esquerda
+    
+    elif key == b"u": # Código da tecla page up
+        center.y += UNIT_PIXEL # Move uma unidade para cima
+
+    elif key == b"o": # Código da tecla page down
+        center.y -= UNIT_PIXEL # Move uma unidade para baixo  
+
+    # Movimentando o vetor cima da câmera
+    elif key == b"f":
+        if up.x != 0: # Se já estiver orientado no eixo x
+            up.x *= -1   # Inverte a câmera
+        else: 
+            up.x = 1
+        
+        up.y = 0
+        up.z = 0
+    
+    elif key == b"g":
+        if up.y != 0: # Se já estiver orientado no eixo y
+            up.y *= -1   # Inverte a câmera
+        else: 
+            up.y = 1
+        
+        up.x = 0
+        up.z = 0
+
+    elif key == b"h":
+        if up.z != 0: # Se já estiver orientado no eixo z
+            up.z *= -1   # Inverte a câmera
+        else: 
+            up.z = 1
+        
+        up.x = 0
+        up.y = 0
+
+    update_camera()
+
+    glutPostRedisplay()
+
+glutInit()
+glutInitDisplayMode(GLUT_DOUBLE | GLUT_DEPTH | GLUT_RGB)
+glutInitWindowPosition(0,0)
+glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT)  
+glutCreateWindow("Futebol")
+
+init() 
+
+glutDisplayFunc(display)
+glutReshapeFunc(reshape)
+glutKeyboardFunc(keyboard_handler)
+
+glutMainLoop()
