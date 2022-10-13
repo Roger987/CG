@@ -77,6 +77,7 @@ def draw_bola():
     glPushMatrix()
     glColor3fv(colors["white"])
     glTranslatef(xBola, yBola, zBola) # movimenta a bola
+    glRotatef(20,xBola,yBola,zBola)
     glutSolidSphere(0.5, 100, 100)
     glPopMatrix()
 
